@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Professional English Simulator</title>
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    padding: 20px;
+}
+#chat {
+    height: 380px;
+    overflow-y: auto;
+    border: 1px solid #334155;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+input {
+    width: 75%;
+    padding: 10px;
+}
+button {
+    padding: 10px;
+}
+.bot { color: #22c55e; }
+.user { color: #38bdf8; }
+#stats { margin-bottom: 10px; color: #facc15; }
+</style>
+</head>
+<body>
+
+<h2>Professional English Practice</h2>
+<div id="stats"></div>
+<div id="chat"></div>
+
+<input type="text" id="userInput" placeholder="Write a professional answer...">
+<button onclick="sendMessage()">Send</button>
+
+<script>
+
+let xp = parseInt(localStorage.getItem("xpPro")) || 0;
+let level = calculateLevel(xp);
+const chat = document.getElementById("chat");
+
+const scenarios = [
+    "You are in a job interview. Why should we hire you?",
+    "Explain your professional goals.",
+    "Describe a difficult situation at work and how you solved it.",
+    "You are at the airport. Explain your travel purpose.",
+    "Present yourself in a professional way."
+];
+
+function calculateLevel(points){
+    if(points < 50) return "A1";
+    if(points < 120) return "A2";
+    if(points < 250) return "B1";
+    if(points < 400) return "B2";
+    return "C1";
+}
+
+function updateStats(){
+    document.getElementById("stats").innerHTML =
+        "Level: " + level + " | XP: " + xp;
+}
+
+function addMessage(text, sender){
+    const div = document.createElement("div");
+    div.className = sender;
+    div.innerHTML = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function randomScenario(){
+    return scenarios[Math.floor(Math.random() * scenarios.length)];
+}
+
+function analyzeAnswer(answer){
+    answer = answer.toLowerCase();
+    let feedback = "";
+    let bonus = 0;
+
+    if(answer.length < 15){
+        feedback += "Your answer is too short. Try to expand it.<br>";
+    } else {
+        bonus += 10;
+    }
+
+    if(answer.includes("because")){
+        feedback += "Good use of 'because'.<br>";
+        bonus += 10;
+    }
+
+    if(answer.includes("however") || answer.includes("although")){
+        feedback += "Excellent use of contrast structure!<br>";
+        bonus += 15;
+    }
+
+    if(answer.includes("he go")){
+        feedback += "Correction: Say 'He goes' (add s).<br>";
+    }
+
+    if(feedback === ""){
+        feedback = "Strong professional answer 👏";
+        bonus += 20;
+    }
+
+    xp += bonus;
+    level = calculateLevel(xp);
+    localStorage.setItem("xpPro", xp);
+    updateStats();
+
+    return feedback;
+}
+
+function sendMessage(){
+    const input = document.getElementById("userInput");
+    const text = input.value;
+    if(text === "") return;
+
+    addMessage("You: " + text, "user");
+
+    const feedback = analyzeAnswer(text);
+    addMessage("Tutor: " + feedback, "bot");
+
+    setTimeout(() => {
+        addMessage("Tutor: " + randomScenario(), "bot");
+    }, 1200);
+
+    input.value = "";
+}
+
+window.onload = function(){
+    updateStats();
+    addMessage("Tutor: Welcome to Professional English Training.", "bot");
+    addMessage("Tutor: " + randomScenario(), "bot");
+};
+
+</script>
+
+</body>
+</html>
